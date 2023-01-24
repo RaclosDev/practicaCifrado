@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdbool.h>
 
 const int MAX_LENGTH = 80; // tamaño máximo permitido
 // Matriz clave inicial
@@ -14,33 +15,55 @@ char matrizClave[6][6] = {
 };
 char matrizCifrado[7][7];
 
+//Funcion para resetear la matriz entre ejecucuciones
+void resetMatrix() {
+    char originalMatrix[6][6] = {
+            {'A', 'B', 'C', 'D', 'E', 'F'},
+            {'G', 'H', 'I', 'J', 'K', 'L'},
+            {'M', 'N', 'O', 'P', 'Q', 'R'},
+            {'S', 'T', 'U', 'V', 'W', 'X'},
+            {'Y', 'Z', ' ', '1', '2', '3'},
+            {'4', '5', '6', '7', '8', '9'}
+    };
+
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 6; j++) {
+            matrizClave[i][j] = originalMatrix[i][j];
+        }
+    }
+}
+
+//Generamos una matriz nueva y le añadimos el cifrado
 void generarMatrizClave(int clave) {
-    int i;
-    // Desplazar elementos de la matriz clave según la clave
-    for (i = 0; i < clave; i++) {
-        char ultimo = matrizClave[5][5];
-        int j;
-        for (j = 0; j < 5; j++) {
-            matrizClave[5][j] = matrizClave[5][j + 1];
+    resetMatrix();
+    int i, j, k;
+    //Crea matriz actual
+    char matrizClaveFinal[6][6];
+//Movemos todos
+    for (k = 0; k < clave; ++k) {
+        for (i = 0; i < 6; i++) {
+            for (j = 0; j < 6; j++) {
+
+                if (j == 5) {
+                    matrizClaveFinal[i][j] = matrizClave[i + 1][0];
+                } else {
+                    matrizClaveFinal[i][j] = matrizClave[i][j + 1];
+                }
+            }
+
         }
-        for (j = 0; j < 5; j++) {
-            int k;
-            for (k = 5; k > 0; k--) {
-                matrizClave[k][5] = matrizClave[k - 1][5];
-            }
-            for (k = 0; k < 5; k++) {
-                matrizClave[0][k] = matrizClave[0][k + 1];
-            }
-            for (k = 0; k < 5; k++) {
-                matrizClave[k][0] = matrizClave[k + 1][0];
+        //asignamos el ultimo
+        matrizClaveFinal[i - 1][j - 1] = matrizClave[0][0];
+        //Copiamos la nueva en la clave
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                matrizClave[i][j] = matrizClaveFinal[i][j];
             }
         }
-        matrizClave[5][5] = ultimo;
     }
 
     // Crear matriz de cifrado
     for (i = 0; i < 6; i++) {
-        int j;
         for (j = 0; j < 6; j++) {
             matrizCifrado[i][j] = matrizClave[i][j];
         }
@@ -61,15 +84,16 @@ void generarMatrizClave(int clave) {
     matrizCifrado[6][6] = ' ';
 }
 
+//Funcion para contar longitudes de textos propia
 int contarLongitud(char texto[]) {
     int longitud = 0;
 
-    for (int i = 0; texto[i] != '\0'; i++) {
+    for (int i = 0; texto[i] != '\0' && texto[i] != '\n'; i++) {
         longitud++;
     }
     return longitud;
 }
-
+//Funcion para pasar a mayusculas un texto mediante ascii
 void toMayus(char texto[]) {
     int i;
 
@@ -80,6 +104,7 @@ void toMayus(char texto[]) {
     }
 }
 
+//Busca las coordenadas en la matriz clave
 int *buscarCoordenadas(char caracter, char matriz[6][6]) {
 
     int i, j;
@@ -96,7 +121,7 @@ int *buscarCoordenadas(char caracter, char matriz[6][6]) {
     }
     return posiciones;
 }
-
+//Busca coordenadas en la matriz con el cifrado
 int *buscarCoordenadasDescifrar(char fila, char columna, char matriz[7][7]) {
 
     int i, j;
@@ -113,7 +138,6 @@ int *buscarCoordenadasDescifrar(char fila, char columna, char matriz[7][7]) {
     }
     return posiciones;
 }
-
 
 void cifrarTexto(char texto[], char textoCifrado[]) {
     int i, j = 0;
@@ -152,6 +176,7 @@ void encripta() {
     char textoCifrado[160];
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
+
     generarMatrizClave(clave);
 
     printf("Introduce el texto a cifrar:\n");
@@ -167,7 +192,7 @@ void desencripta() {
     int clave;
     char temp;
     char textoCifrado[160];
-    char textoDescifrado[80];
+    char textoDescifrado[80]= {"\0"};
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
     generarMatrizClave(clave);
@@ -186,65 +211,84 @@ void encriptaArchivo() {
     int clave;
     char textoSinCifrar[160];
     char textoCifrado[80];
+    char *rutaArchivoIn = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\encriptarIn.txt";
+    char *rutaArchivoOut = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\encriptarOut.txt";
+
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
     generarMatrizClave(clave);
 
-    toMayus(&textoSinCifrar);
-    FILE *archivo;
+    FILE *archivoRead;
+    FILE *archivoWrite;
+    archivoRead = fopen(rutaArchivoIn, "r");
 
-    archivo = fopen("C:\\Users\\Carlos\\CLionProjects\\untitled5\\encriptarIn.txt", "r");
-
-    if (archivo == NULL) {
+    if (archivoRead == NULL) {
         perror("Error al abrir el archivo\n");
     }
 
-    while (fgets(textoSinCifrar, sizeof(textoSinCifrar), archivo) != NULL);
+    bool append = false;
+    while (fgets(textoSinCifrar, sizeof(textoSinCifrar), archivoRead) != NULL) {
 
-    fclose(archivo);
-    toMayus(&textoSinCifrar);
+        toMayus(&textoSinCifrar);
 
-    archivo = fopen("C:\\Users\\Carlos\\CLionProjects\\untitled5\\encriptarOut.txt", "w");
+        if (append) {
+            archivoWrite = fopen(rutaArchivoOut, "a");
+        } else {
+            archivoWrite = fopen(rutaArchivoOut, "w");
+            append = true;
+        }
 
-    if (archivo == NULL) {
-        perror("Error al abrir el archivo\n");
+        if (archivoWrite == NULL) {
+            perror("Error al abrir el archivo\n");
+        }
+        cifrarTexto(textoSinCifrar, &textoCifrado);
+        fprintf(archivoWrite, "%s", textoCifrado);
+        fprintf(archivoWrite, "\n");
+        fclose(archivoWrite);
     }
-    cifrarTexto(textoSinCifrar, &textoCifrado);
-    fprintf(archivo, "%s", textoCifrado);
-    fclose(archivo);
+    fclose(archivoRead);
 }
-
 
 void desencriptaArchivo() {
     int clave;
-    char textoCifrado[160];
-    char textoDescifrado[80];
+    char textoSinCifrar[160];
+    char *rutaArchivoIn = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\descifrarIn.txt";
+    char *rutaArchivoOut = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\descifrarOut.txt";
+
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
     generarMatrizClave(clave);
 
-    toMayus(&textoCifrado);
-    FILE *archivo;
+    FILE *archivoRead;
+    FILE *archivoWrite;
+    archivoRead = fopen(rutaArchivoIn, "r");
 
-    archivo = fopen("C:\\Users\\Carlos\\CLionProjects\\untitled5\\descifrarIn.txt", "r");
-
-    if (archivo == NULL) {
+    if (archivoRead == NULL) {
         perror("Error al abrir el archivo\n");
     }
 
-    while (fgets(textoCifrado, sizeof(textoCifrado), archivo) != NULL);
+    bool append = false;
+    while (fgets(textoSinCifrar, sizeof(textoSinCifrar), archivoRead) != NULL) {
 
-    fclose(archivo);
-    toMayus(&textoCifrado);
+        toMayus(&textoSinCifrar);
 
-    archivo = fopen("C:\\Users\\Carlos\\CLionProjects\\untitled5\\descifrarOut.txt", "w");
+        if (append) {
+            archivoWrite = fopen(rutaArchivoOut, "a");
+        } else {
+            archivoWrite = fopen(rutaArchivoOut, "w");
+            append = true;
+        }
 
-    if (archivo == NULL) {
-        perror("Error al abrir el archivo\n");
+        if (archivoWrite == NULL) {
+            perror("Error al abrir el archivo\n");
+        }
+        char textoCifrado[80] = {"\0"};
+        descifrarTexto(textoSinCifrar, &textoCifrado);
+        fprintf(archivoWrite, "%s", textoCifrado);
+        fprintf(archivoWrite, "\n");
+        fclose(archivoWrite);
     }
-    descifrarTexto(textoCifrado, &textoDescifrado);
-    fprintf(archivo, "%s", textoDescifrado);
-    fclose(archivo);
+    fclose(archivoRead);
 }
 
 int main() {
