@@ -153,9 +153,7 @@ void descifrarTexto(char textoCifrado[], char textoDescifrado[]) {
         textoDescifrado[j] = matrizCifrado[coordenadas[0]][coordenadas[1]];
         j++;
     }
-    for (j; j < MAX_LENGTH; j++) {
-        textoCifrado[j] = '\0';
-    }
+    textoCifrado[j] = '\0';
 }
 
 void encripta() {
