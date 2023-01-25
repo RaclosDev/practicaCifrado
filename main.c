@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 const int MAX_LENGTH = 80; // tamaño máximo permitido
 // Matriz clave inicial
@@ -93,14 +93,12 @@ int contarLongitud(char texto[]) {
     }
     return longitud;
 }
-//Funcion para pasar a mayusculas un texto mediante ascii
-void toMayus(char texto[]) {
-    int i;
-
-    for (i = 0; texto[i] != '\0'; i++) {
-        if (texto[i] >= 'a' && texto[i] <= 'z') {
-            texto[i] -= 32;
-        }
+//Funcion para pasar a mayusculas un texto mediante
+void toMayus(char* texto) {
+    int i = 0;
+    while (texto[i]) {
+        texto[i] = toupper(texto[i]);
+        i++;
     }
 }
 
@@ -164,7 +162,7 @@ void descifrarTexto(char textoCifrado[], char textoDescifrado[]) {
         textoDescifrado[j] = matrizCifrado[coordenadas[0]][coordenadas[1]];
         j++;
     }
-    for (j; j < 80; j++) {
+    for (j; j < MAX_LENGTH; j++) {
         textoCifrado[j] = '\0';
     }
 }
@@ -172,17 +170,16 @@ void descifrarTexto(char textoCifrado[], char textoDescifrado[]) {
 void encripta() {
     int clave;
     char temp;
-    char texto[80];
-    char textoCifrado[160];
+    char texto[MAX_LENGTH];
+    char textoCifrado[MAX_LENGTH*2];
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
 
     generarMatrizClave(clave);
 
     printf("Introduce el texto a cifrar:\n");
-    scanf("%c", &temp); //Limpiamos buffer
-    scanf("%[^\n]", texto);
-    toMayus(&texto);
+    scanf("%*c%[^\n]", texto);
+    toMayus(texto);
 
     cifrarTexto(texto, &textoCifrado);
     printf("Texto cifrado: %s\n", textoCifrado);
@@ -191,26 +188,24 @@ void encripta() {
 void desencripta() {
     int clave;
     char temp;
-    char textoCifrado[160];
-    char textoDescifrado[80]= {"\0"};
+    char textoCifrado[MAX_LENGTH*2];
+    char textoDescifrado[MAX_LENGTH];
     printf("Introduce una clave (numero entre 0 y 35):\n");
     scanf("%d", &clave);
     generarMatrizClave(clave);
 
-    printf("Introduce el texto a desencriptar:\n");
-    scanf("%c", &temp); //Limpiamos buffer
-    scanf("%[^\n]", textoCifrado);
+    printf("Introduce el texto a cifrar:\n");
+    scanf("%*c%[^\n]", textoCifrado);
     toMayus(&textoCifrado);
 
-
     descifrarTexto(textoCifrado, &textoDescifrado);
-    printf("Texto descifrarOut: %s\n", textoDescifrado);
+    printf("Texto descifrado: %s\n", textoDescifrado);
 }
 
 void encriptaArchivo() {
     int clave;
-    char textoSinCifrar[160];
-    char textoCifrado[80];
+    char textoSinCifrar[MAX_LENGTH*2];
+    char textoCifrado[MAX_LENGTH];
     char *rutaArchivoIn = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\encriptarIn.txt";
     char *rutaArchivoOut = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\encriptarOut.txt";
 
@@ -251,7 +246,7 @@ void encriptaArchivo() {
 
 void desencriptaArchivo() {
     int clave;
-    char textoSinCifrar[160];
+    char textoSinCifrar[MAX_LENGTH*2];
     char *rutaArchivoIn = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\descifrarIn.txt";
     char *rutaArchivoOut = "C:\\Users\\Carlos\\CLionProjects\\practicaEncriptacion\\descifrarOut.txt";
 
@@ -282,7 +277,7 @@ void desencriptaArchivo() {
         if (archivoWrite == NULL) {
             perror("Error al abrir el archivo\n");
         }
-        char textoCifrado[80] = {"\0"};
+        char textoCifrado[MAX_LENGTH];
         descifrarTexto(textoSinCifrar, &textoCifrado);
         fprintf(archivoWrite, "%s", textoCifrado);
         fprintf(archivoWrite, "\n");
@@ -302,7 +297,7 @@ int main() {
         printf("3. Encriptar un texto incluido en un archivo de texto\n");
         printf("4. Desencriptar un texto incluido en un archivo de texto\n");
         printf("5. Salir\n");
-        printf("Selecciona una opcion: ");
+        printf("Selecciona una opcion:\n");
         scanf("%d", &opcion);
 
         switch (opcion) {
