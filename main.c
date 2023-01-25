@@ -84,15 +84,6 @@ void generarMatrizClave(int clave) {
     matrizCifrado[6][6] = ' ';
 }
 
-//Funcion para contar longitudes de textos propia
-int contarLongitud(char texto[]) {
-    int longitud = 0;
-
-    for (int i = 0; texto[i] != '\0' && texto[i] != '\n'; i++) {
-        longitud++;
-    }
-    return longitud;
-}
 //Funcion para pasar a mayusculas un texto mediante
 void toMayus(char* texto) {
     int i = 0;
@@ -139,7 +130,7 @@ int *buscarCoordenadasDescifrar(char fila, char columna, char matriz[7][7]) {
 
 void cifrarTexto(char texto[], char textoCifrado[]) {
     int i, j = 0;
-    int longitud = contarLongitud(texto);
+    int longitud = strlen(texto);
     for (i = 0; i < longitud; i++) {
         char caracter = texto[i];
         int *coordenadas = buscarCoordenadas(caracter, matrizClave);
@@ -154,7 +145,7 @@ void cifrarTexto(char texto[], char textoCifrado[]) {
 
 void descifrarTexto(char textoCifrado[], char textoDescifrado[]) {
     int i, j = 0;
-    int longitud = contarLongitud(textoCifrado);
+    int longitud = strlen(textoCifrado);
     for (i = 0; i < longitud; i += 2) {
         char fila = textoCifrado[i];
         char columna = textoCifrado[i + 1];
